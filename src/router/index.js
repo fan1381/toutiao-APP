@@ -8,7 +8,8 @@ Vue.use(VueRouter)
 const routes = [{
   path: '/login', // 登录页面
   name: 'login',
-  component: () => ('@/views/login')
+  component: () =>
+        import ('@/views/login')
 }, {
   path: '/',
   name: 'tab-var',

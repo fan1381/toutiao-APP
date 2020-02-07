@@ -64,10 +64,14 @@ export default {
       })
       // 请求提交
       try {
-        const res = await login(user)
-        this.$store.commit('setUser', res.data.data) // 将登陆状态存储到vuex容器中
+        const { data } = await login(user)
+        this.$store.commit('setUser', data.data) // 将登陆状态存储到vuex容器中
         // res.data.data => { token: 'xxx', refresh_token: 'xxx' }
-        this.$toast.message('登录成功')
+        this.$toast.success('登录成功')
+        // 如果有 redirect 则跳转到来源页，没有就跳转到首页
+        const redirect = this.$route.query.redirect || '/'
+        // 登录成功，使用 replace 跳转（不会形成历史记录）
+        this.$router.replace(redirect)
       } catch (err) {
         this.$toast.fail('登录失败')
       }

@@ -8,7 +8,7 @@ export const setItem = (name, value) => {
   window.localStorage.setItem(name, value)
 }
 // 获取
-export const getItem = () => {
+export const getItem = (name) => {
   const data = window.localStorage.getItem(name)
   try {
     // 如果获取的是字符串，就需要转成对象，否则就原样返回

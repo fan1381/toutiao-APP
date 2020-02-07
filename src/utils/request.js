@@ -19,7 +19,7 @@ request.defaults.transformResponse = [function (data) {
   }
 }]
 // 请求拦截器
-axios.interceptors.request.use(function (config) {
+request.interceptors.request.use(function (config) {
   // config 请求配置对象，我们可以通过修改 config 来实现统一请求数据处理
   const { user } = store.state
   // 统一添加 token
@@ -35,4 +35,14 @@ axios.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 // 响应拦截器
+
+request.interceptors.response.use(function (response) {
+  // Any status code that lie within the range of 2xx cause this function to trigger
+  // Do something with response data
+  return response
+}, function (error) {
+  // Any status codes that falls outside the range of 2xx cause this function to trigger
+  // Do something with response error
+  return Promise.reject(error)
+})
 export default request

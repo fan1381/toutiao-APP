@@ -12,10 +12,19 @@ export const login = (data) => {
     data // 请求体参数
   })
 }
+
 // 发送验证码
 export const code = (mobile) => {
   return request({
     method: 'GET',
     url: `/app/v1_0/sms/codes/${mobile}`
+  })
+}
+
+// 获取当前登录用户信息
+export const getUserInfo = () => {
+  return request({
+    method: 'GET',
+    url: '/app/v1_0/user'
   })
 }

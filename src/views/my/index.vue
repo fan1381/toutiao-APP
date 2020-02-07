@@ -3,32 +3,32 @@
     <!-- 已登录：用户信息 -->
     <div v-if="$store.state.user" class="user-info-wrap">
       <div class="base-info-wrap">
-        <div class="avatar-title-wrap">
+        <div class="avatar-title-wrap" @click="$router.push('/user/' + user.id)">
           <van-image
             class="avatar"
             round
             fit="cover"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
+            :src="user.photo"
           />
-          <div class="title">黑马程序员</div>
+          <div class="title">{{ user.name }}</div>
         </div>
-        <van-button round size="mini">编辑资料</van-button>
+        <van-button round size="mini" @click="$router.push('/user/profile')">编辑资料</van-button>
       </div>
       <van-grid class="data-info" :border="false">
         <van-grid-item>
-          <span class="count">123</span>
+          <span class="count">{{ user.art_count }}</span>
           <span class="text">头条</span>
         </van-grid-item>
         <van-grid-item>
-          <span class="count">123</span>
+          <span class="count">{{ user.follow_count }}</span>
           <span class="text">关注</span>
         </van-grid-item>
         <van-grid-item>
-          <span class="count">123</span>
+          <span class="count">{{ user.fans_count }}</span>
           <span class="text">粉丝</span>
         </van-grid-item>
         <van-grid-item>
-          <span class="count">123</span>
+          <span class="count">{{ user.like_count }}</span>
           <span class="text">获赞</span>
         </van-grid-item>
       </van-grid>
@@ -36,7 +36,7 @@
     <!-- /已登录：用户信息 -->
 
     <!-- 未登录 -->
-    <div v-else class="not-login">
+    <div v-else class="not-login" @click="$router.push('/login')">
       <div class="mobile"></div>
       <div class="text">点击登录</div>
     </div>
@@ -44,20 +44,20 @@
 
     <!-- 其它 -->
     <van-grid clickable :column-num="3">
-      <van-grid-item text="我的收藏">
+      <van-grid-item text="我的收藏" to="/my-article/collect">
         <van-icon slot="icon" name="star-o" color="#eb5253" />
       </van-grid-item>
-      <van-grid-item text="浏览历史">
+      <van-grid-item text="浏览历史" to="/my-article/history">
         <van-icon slot="icon" name="browsing-history-o" color="#ffa023" />
       </van-grid-item>
-      <van-grid-item text="作品">
+      <van-grid-item text="作品" to="/my-article">
         <van-icon slot="icon" name="edit" color="#678eff" />
       </van-grid-item>
     </van-grid>
 
     <van-cell-group :border="false">
-      <van-cell title="消息通知" is-link />
-      <van-cell title="小智同学" is-link />
+      <!-- <van-cell title="消息通知" is-link /> -->
+      <van-cell title="小智同学" is-link @click="$router.push('/user/chat')" />
     </van-cell-group>
 
     <van-cell-group v-if="$store.state.user">
@@ -65,6 +65,7 @@
         style="text-align: center;"
         title="退出登录"
         clickable
+        @click="onLogout"
       />
     </van-cell-group>
     <!-- /其它 -->
@@ -72,18 +73,39 @@
 </template>
 
 <script>
+import { getUserInfo } from '@/api/user'
 export default {
   name: 'MyPage',
   components: {},
   props: {},
   data () {
-    return {}
+    return {
+      user: {
+
+      }
+    }
   },
   computed: {},
   watch: {},
-  created () {},
+  created () {
+    //   如果用户登录了，再去请求信息
+    if (this.$store.state.user) {
+      this.loadUser()
+    }
+  },
   mounted () {},
-  methods: {}
+  methods: {
+    async loadUser () {
+      try {
+        const { data } = await getUserInfo()
+        this.user = data.data
+      } catch (error) {
+        console.log(error)
+
+        this.$toast('获取数据失败')
+      }
+    }
+  }
 }
 </script>
 
