@@ -4,24 +4,29 @@
     <van-nav-bar title="登录" />
 
     <!-- 表单 -->
-    <van-cell-group>
-      <van-field v-model="user.mobile" required clearable label="手机号" placeholder="请输入手机号"/>
-      <van-field v-model="user.code" required label="验证码" placeholder="请输入验证码">
-     <van-count-down v-if="codeShow" slot="button"  format=" ss 秒" :time="60*1000" />
-      <van-button v-else @click="onCode" slot="button" size='small' type='primary'>发送验证码</van-button>
-      </van-field>
-    </van-cell-group>
+    <ValidationObserver ref="form">     <!-- 包裹整个表单 -->
+      <ValidationProvider name='手机号' rules='required|mobile'>    <!-- 包裹具体元素和校验规则 -->
+        <van-field v-model="user.mobile" required clearable label="手机号" placeholder="请输入手机号" />
+      </ValidationProvider>
+
+      <ValidationProvider name='验证码' rules='required|code'>
+        <van-field v-model="user.code" required label="验证码" placeholder="请输入验证码">
+          <van-count-down v-if="codeShow" slot="button" format=" ss 秒" :time="60*1000" />
+          <van-button v-else @click="onCode" slot="button" size="small" type="primary">发送验证码</van-button>
+        </van-field>
+      </ValidationProvider>
+    </ValidationObserver>
 
     <!-- 登录按钮 -->
     <div class="btn-wrap">
       <van-button @click="onLogin" type="info">登录</van-button>
     </div>
-
   </div>
 </template>
 
 <script>
 import { login, code } from '@/api/user'
+import { validate } from 'vee-validate'
 export default {
   name: 'LoginPage',
   components: {},
@@ -39,11 +44,23 @@ export default {
   watch: {},
   created () {},
   methods: {
-    // 登录
+    // 点击登录
     async onLogin () {
       // 获取表单数据
       const user = this.user
       // 验证表单
+      // 错误提示消息
+      const success = await this.$refs.form.validate()
+      if (!success) {
+        setTimeout(() => {
+          const errors = this.$refs.form.errors
+          const item = Object.values(errors).find(item => {
+            return item[0]
+          })
+          this.$toast(item[0])
+        }, 100)
+        return
+      }
       this.$toast.loading({
         message: '登录中...'
       })
@@ -56,9 +73,18 @@ export default {
         this.$toast.fail('登录失败')
       }
     },
-    // 发送验证码
+
+    // 点击发送验证码
     async onCode () {
       const { mobile } = this.user
+      // 验证手机号是否有效
+      const validateResult = await validate(mobile, 'required|mobile', {
+        name: '手机号'
+      })
+      if (!validateResult.valid) { // valid: 验证是否成功，成功 true，失败 false
+        this.$toast(validateResult.errors[0])
+        return
+      }
       try {
         this.codeShow = true // 验证码倒计时
         await code(mobile)
@@ -72,17 +98,15 @@ export default {
         this.$toast('发送失败')
       }
     }
-
   }
 }
 </script>
 
 <style scoped lang='less'>
-.btn-wrap{
-    padding: 27px 17px;
-    .van-button{
-        width: 100%;
-    }
+.btn-wrap {
+  padding: 27px 17px;
+  .van-button {
+    width: 100%;
+  }
 }
-
 </style>
