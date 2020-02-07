@@ -101,9 +101,18 @@ export default {
         this.user = data.data
       } catch (error) {
         console.log(error)
-
         this.$toast('获取数据失败')
       }
+    },
+    async onLogout () {
+      await this.$dialog.confirm({
+        title: '退出提示',
+        message: '确认退出吗？'
+      }).then(() => {
+        this.$store.commit('setUser', null)// 将vuex里的token设置成null
+      }).catch(() => {
+        this.$toast('以取消退出')
+      })
     }
   }
 }
