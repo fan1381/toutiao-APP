@@ -46,11 +46,9 @@ export default {
   methods: {
     // 点击登录
     async onLogin () {
-      // 获取表单数据
-      const user = this.user
+      const user = this.user // 获取表单数据
       // 验证表单
-      // 错误提示消息
-      const success = await this.$refs.form.validate()
+      const success = await this.$refs.form.validate() // 错误提示消息
       if (!success) {
         setTimeout(() => {
           const errors = this.$refs.form.errors
@@ -67,7 +65,8 @@ export default {
       // 请求提交
       try {
         const res = await login(user)
-        console.log(res)
+        this.$store.commit('setUser', res.data.data) // 将登陆状态存储到vuex容器中
+        // res.data.data => { token: 'xxx', refresh_token: 'xxx' }
         this.$toast.message('登录成功')
       } catch (err) {
         this.$toast.fail('登录失败')
