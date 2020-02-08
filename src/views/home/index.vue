@@ -5,7 +5,7 @@
     <!-- 弹出层 -->
     <van-popup v-model="isChannelEditShow" position="bottom" closeable :style="{ height: '100%' }" >
  编辑频道组件
-  <channel-edit />
+  <channel-edit :user-channels='userChannels' />
   </van-popup>
     <!-- /导航栏 -->
 
