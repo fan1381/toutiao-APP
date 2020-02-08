@@ -24,7 +24,7 @@ export default {
       list: [], // 列表数据
       loading: false, // 上拉加载更多的 loading 状态
       finished: false, // 数据是否加载完毕
-      isLoading: false,
+      isLoading: false, // 下拉刷新状态
       timestamp: null // 用于获取下一页数据的时间戳
     }
   },
@@ -56,11 +56,20 @@ export default {
       }
     },
     // 下拉刷新
-    onRefresh () {
-      setTimeout(() => {
-        this.$toast('刷新成功')
-        this.isLoading = false
-      }, 500)
+    async onRefresh () {
+      // 1请求数据
+      const { data } = await getArticle({
+        channel_id: this.channel.id, // 频道id
+        timestamp: Date.now(), // 时间戳，请求新的推荐数据传当前的时间戳，请求历史推荐传指定的时间戳
+        with_top: 1
+      })
+      //   2如果有数据，把数据放到最前面
+      const { results } = data.data
+      this.list.unshift(...results)
+      //   3关闭下拉刷新的loading状态
+      this.isLoading = false
+      // 4提示更新成功
+      this.$toast(`更新了${results.length}条数据`)
     }
   }
 }
