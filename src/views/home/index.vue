@@ -1,15 +1,21 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
-    <van-nav-bar title="首页" />
+    <van-nav-bar title="首页" fixed />
+    <!-- 弹出层 -->
+    <van-popup v-model="isChannelEditShow" position="bottom" closeable :style="{ height: '100%' }" >
+ 编辑频道组件
+  <channel-edit />
+  </van-popup>
     <!-- /导航栏 -->
 
     <!-- 频道列表 -->
     <van-tabs v-model="active">
+      <van-icon class="wap-nav" slot="nav-right" name="wap-nav" @click="isChannelEditShow = true" />
       <van-tab :title="channel.name" v-for="channel in userChannels" :key="channel.id">
-        <articleList :channel='channel'></articleList><!-- 组件传值 -->
+        <articleList :channel="channel"></articleList>
+        <!-- 组件传值 -->
       </van-tab>
-
     </van-tabs>
     <!-- /频道列表 -->
   </div>
@@ -18,16 +24,20 @@
 <script>
 import { getUserChannels } from '@/api/user'
 import articleList from './components/article-list'
+import ChannelEdit from './components/channel-edit'
+
 export default {
   name: 'HomePage',
   components: {
-    articleList
+    articleList, // 注册文章列表组价
+    ChannelEdit// 注册编辑组件
   },
   props: {},
   data () {
     return {
       active: 0, // 控制标签页的激活项，用v-model绑定
-      userChannels: []// 用户频道列表
+      userChannels: [], // 用户频道列表
+      isChannelEditShow: false // 这里我们先设置为 true 就能看到弹窗的页面了
     }
   },
   computed: {},
@@ -48,28 +58,21 @@ export default {
 
 <style scoped lang="less">
 .home-container {
-  .nav-bar {
+  padding-top: 90px; //给页面容器添加上下内边距
+  padding-bottom: 50px;
+  .wap-nav{
     position: fixed;
-    top: 0;
+    right: 0;
+    line-height: 44px;
+    background-color: #fff;
+  }
+  /deep/ .van-tabs__wrap {
+    //让频道列表固定定位
+    position: fixed;
+    top: 46px;
     left: 0;
     right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 15px;
-    height: 46px;
-    background-color: #3196fa;
     z-index: 1;
-    .logo {
-      // background: url("./logo-light.png") no-repeat;
-      background-size: cover;
-      width: 100px;
-      height: 30px;
-    }
-    .search-btn {
-      background-color: #5babfb;
-      width: 50%;
-    }
   }
 }
 </style>
