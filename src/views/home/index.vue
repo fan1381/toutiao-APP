@@ -25,6 +25,7 @@
 import { getUserChannels } from '@/api/user'
 import articleList from './components/article-list'
 import ChannelEdit from './components/channel-edit'
+import { getItem } from '@/utils/storage'
 
 export default {
   name: 'HomePage',
@@ -41,7 +42,9 @@ export default {
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+
+  },
   created () {
     this.loadUserChannels()
   },
@@ -49,8 +52,19 @@ export default {
   methods: {
     // 加载频道列表
     async loadUserChannels () {
-      const { data } = await getUserChannels()
-      this.userChannels = data.data.channels
+      // 1先储存频道列表
+      let channels = []
+      // 2获取本地存储的频道列表
+      const localUserChannels = getItem()
+      // 3优先使用本地的，没有就使用线上的
+      if (localUserChannels) {
+        channels = localUserChannels
+      } else {
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      }
+      // 最后把数据赋值到当前组件中
+      this.userChannels = channels
     }
   }
 }
