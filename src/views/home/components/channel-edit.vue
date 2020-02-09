@@ -12,8 +12,8 @@
 
     <van-grid :gutter="10">
       <van-grid-item v-for="(item,index) in userChannels" :key="item.id" :text="item.name" @click="userChannel(index)">
-        <span class="txt" :class="{active:value===index}">{{ item.name }}</span>
-        <van-icon v-show="isEditShow" slot="icon" name="close" />
+        <span slot="text" class="txt" :class="{active:value===index}">{{ item.name }}</span>
+        <van-icon v-show="isEditShow && index !==0" slot="icon" name="close" />
       </van-grid-item>
     </van-grid>
 
@@ -86,7 +86,7 @@ export default {
       this.userChannels.push(channel)
     },
     userChannel (index) {
-      if (this.isEditShow) { // 如果是编辑状态就删除频道
+      if (this.isEditShow && index !== 0) { // 如果是编辑状态就删除频道
         this.userChannels.splice(index, 1)
       } else {
         this.$emit('input', index)// 修改激活页的标签
