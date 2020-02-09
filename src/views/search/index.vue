@@ -3,7 +3,7 @@
     <!-- 搜索栏 -->
     <form action="/">
       <van-search
-      class="search-form"
+        class="search-form"
         v-model="searchText"
         placeholder="请输入搜索关键词"
         show-action
@@ -18,9 +18,9 @@
     <search-result v-if="isResultShow"></search-result>
     <!-- 联想建议 -->
     <van-cell-group v-else-if="searchText">
-      <van-cell icon="search"   v-for="(item ,index) in Suggestions"
-      :key="index" :title="item"/>
-
+      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index">
+        <div slot="title" v-html="highlight(item)"></div>   <!-- 高亮显示联想建议 -->
+      </van-cell>
     </van-cell-group>
 
     <!-- 历史记录 -->
@@ -47,7 +47,6 @@
         <van-icon name="close"></van-icon>
       </van-cell>
     </van-cell-group>
-
   </div>
 </template>
 
@@ -83,8 +82,16 @@ export default {
       }
       const { data } = await getSuggestions(searchText)
       this.Suggestions = data.data.options
+    },
+    // 联想建议高亮显示
+    highlight (str) {
+      return str
+        .toLowerCase()
+        .replace(
+          this.searchText.toLowerCase(),
+          `<span style='color:red'>${this.searchText}</span>`
+        )
     }
-
   }
 }
 </script>
