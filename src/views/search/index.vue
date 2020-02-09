@@ -15,10 +15,10 @@
     </form>
 
     <!-- 搜索结果 -->
-    <search-result v-if="isResultShow"></search-result>
+    <search-result v-if="isResultShow" :q='searchText'></search-result>
     <!-- 联想建议 -->
     <van-cell-group v-else-if="searchText">
-      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index">
+      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index" @click="onShow(item)">
         <div slot="title" v-html="highlight(item)"></div>   <!-- 高亮显示联想建议 -->
       </van-cell>
     </van-cell-group>
@@ -91,6 +91,11 @@ export default {
           this.searchText.toLowerCase(),
           `<span style='color:red'>${this.searchText}</span>`
         )
+    },
+    // 点击联想建议搜索
+    onShow (item) {
+      this.searchText = item // 更新搜索框的数据
+      this.isResultShow = true// 展示搜索结果
     }
   }
 }
