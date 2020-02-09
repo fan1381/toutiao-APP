@@ -1,26 +1,22 @@
 <template>
   <div class="channel-edit">
     <van-cell title="我的频道" :border="false">
-      <van-button size="mini" round type="danger" plain>编辑</van-button>
+      <van-button size="mini" round type="danger" plain   @click="isEditShow = !isEditShow"
+>{{ isEditShow ? '完成' : '编辑'}}</van-button>
     </van-cell>
 
     <van-grid :gutter="10">
-      <van-grid-item
-       v-for="item in userChannels"
-        :key="item.id"
-        :text="item.name"
-      />
+      <van-grid-item v-for="item in userChannels" :key="item.id" :text="item.name" >
+              <van-icon v-show="isEditShow" slot="icon" name="close" />
+ </van-grid-item>
     </van-grid>
 
     <van-cell title="推荐频道" :border="false" />
-<van-grid :gutter="10">
-  <van-grid-item
-    v-for="channel in remainingChannels"
-    :key="channel.id"
-    :text="channel.name"
-  />
-</van-grid>
-
+    <van-grid :gutter="10">
+      <van-grid-item v-for="channel in remainingChannels" :key="channel.id"
+      :text="channel.name"
+      @click="onAdd(channel)" />
+    </van-grid>
   </div>
 </template>
 
@@ -38,10 +34,12 @@ export default {
   },
   data () {
     return {
-      allChannels: []// 所有频道
+      allChannels: [], // 所有频道
+      isEditShow: true
     }
   },
   computed: {
+    // 计算熟悉获取推荐频道
     remainingChannels () {
       // const { allChannels, userChannels } = this
       // 剩余频道 = 所有频道 - 我的频道
@@ -49,8 +47,9 @@ export default {
       const allChannels = this.allChannels
       const channels = []
 
-      allChannels.forEach(item => { // 遍历所有频道
-      // 如果我的频道中不包含当前被遍历的频道，则要
+      allChannels.forEach(item => {
+        // 遍历所有频道
+        // 如果我的频道中不包含当前被遍历的频道，则要
         if (!userChannels.find(items => items.id === item.id)) {
           channels.push(item)
         }
@@ -68,13 +67,26 @@ export default {
     async loadAllChannels () {
       const { data } = await getAllChannels()
       this.allChannels = data.data.channels
+    },
+    // 添加频道
+    onAdd (channel) {
+      this.userChannels.push(channel)
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang=less>
 .channel-edit {
   padding: 40px 0;
+};
+/deep/ .van-grid-item__icon-wrapper {
+  position: absolute;
+  top: -14px;
+  right: -5px;
+  .van-icon-close {
+    font-size: 14px;
+  }
 }
+
 </style>
