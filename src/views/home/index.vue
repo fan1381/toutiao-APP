@@ -3,10 +3,10 @@
     <!-- 导航栏 -->
     <van-nav-bar title="首页" fixed />
     <!-- 弹出层 -->
-    <van-popup v-model="isChannelEditShow" position="bottom" closeable :style="{ height: '100%' }" >
- 编辑频道组件
-  <channel-edit :user-channels='userChannels' />
-  </van-popup>
+    <van-popup v-model="isChannelEditShow" position="bottom" closeable :style="{ height: '100%' }">
+      <!-- 编辑频道组件 -->
+      <channel-edit v-model='active' :user-channels="userChannels" @close='isChannelEditShow=false'/>
+    </van-popup>
     <!-- /导航栏 -->
 
     <!-- 频道列表 -->
@@ -30,7 +30,7 @@ export default {
   name: 'HomePage',
   components: {
     articleList, // 注册文章列表组价
-    ChannelEdit// 注册编辑组件
+    ChannelEdit // 注册编辑组件
   },
   props: {},
   data () {
@@ -60,7 +60,7 @@ export default {
 .home-container {
   padding-top: 90px; //给页面容器添加上下内边距
   padding-bottom: 50px;
-  .wap-nav{
+  .wap-nav {
     position: fixed;
     right: 0;
     line-height: 44px;

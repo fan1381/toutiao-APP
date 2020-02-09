@@ -1,21 +1,30 @@
 <template>
   <div class="channel-edit">
     <van-cell title="我的频道" :border="false">
-      <van-button size="mini" round type="danger" plain   @click="isEditShow = !isEditShow"
->{{ isEditShow ? '完成' : '编辑'}}</van-button>
+      <van-button
+        size="mini"
+        round
+        type="danger"
+        plain
+        @click="isEditShow = !isEditShow"
+      >{{ isEditShow ? '完成' : '编辑'}}</van-button>
     </van-cell>
 
     <van-grid :gutter="10">
-      <van-grid-item v-for="item in userChannels" :key="item.id" :text="item.name" >
-              <van-icon v-show="isEditShow" slot="icon" name="close" />
- </van-grid-item>
+      <van-grid-item v-for="(item,index) in userChannels" :key="item.id" :text="item.name" @click="userChannel(index)">
+        <span class="txt" :class="{active:value===index}">{{ item.name }}</span>
+        <van-icon v-show="isEditShow" slot="icon" name="close" />
+      </van-grid-item>
     </van-grid>
 
     <van-cell title="推荐频道" :border="false" />
     <van-grid :gutter="10">
-      <van-grid-item v-for="channel in remainingChannels" :key="channel.id"
-      :text="channel.name"
-      @click="onAdd(channel)" />
+      <van-grid-item
+        v-for="channel in remainingChannels"
+        :key="channel.id"
+        :text="channel.name"
+        @click="onAdd(channel)"
+      />
     </van-grid>
   </div>
 </template>
@@ -30,12 +39,16 @@ export default {
     userChannels: {
       type: Array,
       required: true
+    },
+    value: {
+      type: Number,
+      required: true
     }
   },
   data () {
     return {
       allChannels: [], // 所有频道
-      isEditShow: true
+      isEditShow: false // 编辑的状态
     }
   },
   computed: {
@@ -71,6 +84,14 @@ export default {
     // 添加频道
     onAdd (channel) {
       this.userChannels.push(channel)
+    },
+    userChannel (index) {
+      if (this.isEditShow) { // 如果是编辑状态就删除频道
+        this.userChannels.splice(index, 1)
+      } else {
+        this.$emit('input', index)// 修改激活页的标签
+        this.$emit('close') // 关闭弹层
+      }
     }
   }
 }
@@ -79,7 +100,7 @@ export default {
 <style scoped lang=less>
 .channel-edit {
   padding: 40px 0;
-};
+}
 /deep/ .van-grid-item__icon-wrapper {
   position: absolute;
   top: -14px;
@@ -88,5 +109,10 @@ export default {
     font-size: 14px;
   }
 }
-
+.txt{
+  font-size: 16px
+}
+.active{
+  color: red
+}
 </style>
