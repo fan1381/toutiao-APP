@@ -34,16 +34,7 @@
       <van-cell title="历史记录">
         <van-icon name="close"></van-icon>
       </van-cell>
-      <van-cell title="单元格">
-        <van-icon name="close"></van-icon>
-      </van-cell>
-      <van-cell title="单元格">
-        <van-icon name="close"></van-icon>
-      </van-cell>
-      <van-cell title="单元格">
-        <van-icon name="close"></van-icon>
-      </van-cell>
-      <van-cell title="单元格">
+      <van-cell v-for="(item,index) in liShiJiLU" :key="index" :title="item">
         <van-icon name="close"></van-icon>
       </van-cell>
     </van-cell-group>
@@ -53,6 +44,7 @@
 <script>
 import searchResult from './components/search-result' // 搜索列表组件
 import { getSuggestions } from '@/api/search'
+import { getItem, setItem } from '@/utils/storage'
 export default {
   name: 'SearchPage',
   components: {
@@ -63,16 +55,27 @@ export default {
     return {
       isResultShow: false, // 搜索结果展示
       searchText: '', // 搜索内容
-      Suggestions: [] // 接受联想建议
+      Suggestions: [], // 接受联想建议
+      liShiJiLU: getItem('liShi') || []// 历史记录
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    liShiJiLU (newVal) {
+      setItem('liShi', newVal)
+    }
+  },
   created () {},
   mounted () {},
   methods: {
     onSearch () {
       this.isResultShow = true
+      //   记录历史记录
+      const index = this.liShiJiLU.indexOf(this.searchText)
+      if (index !== -1) {
+        this.liShiJiLU.splice(index, 1)
+      }
+      this.liShiJiLU.unshift(this.searchText)
     },
     // 搜索联想建议
     async onSearchInput () {
