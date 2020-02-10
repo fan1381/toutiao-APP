@@ -2,7 +2,12 @@
 <template>
   <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
     <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
-      <van-cell @click="$router.push('/article/' + article.art_id)" v-for="(article,index) in list" :key="index" :title="article.title" />
+      <van-cell
+        v-for="(article,index) in list"
+        :key="index"
+        :title="article.title"
+        @click="$router.push('/article/' + article.art_id)"
+      />
     </van-list>
   </van-pull-refresh>
 </template>
@@ -30,9 +35,7 @@ export default {
   },
   computed: {},
   watch: {},
-  created () {
-
-  },
+  created () {},
   mounted () {},
   methods: {
     // 上划加载 list列表
@@ -41,7 +44,7 @@ export default {
       const { data } = await getArticle({
         channel_id: this.channel.id, // 频道id
         timestamp: this.timestamp || Date.now(), // 时间戳，新数据传入当前时间戳，旧数据传入历史时间戳
-        with_top: 1// 是否包含置顶,1包含，2no
+        with_top: 1 // 是否包含置顶,1包含，2no
       })
       // 2加载数据
       const results = data.data.results
