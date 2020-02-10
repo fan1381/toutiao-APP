@@ -52,6 +52,7 @@
 import searchResult from './components/search-result' // 搜索列表组件
 import { getSuggestions } from '@/api/search'
 import { getItem, setItem } from '@/utils/storage'
+import { debounce } from 'lodash'// 函数防抖
 export default {
   name: 'SearchPage',
   components: {
@@ -87,15 +88,25 @@ export default {
       }
       this.liShiJiLU.unshift(this.searchText)
     },
-    // 搜索联想建议
-    async onSearchInput () {
+    // 函数防抖搜索联想建议
+    onSearchInput: debounce(async function () {
       const searchText = this.searchText
       if (!searchText) {
         return
       }
       const { data } = await getSuggestions(searchText)
       this.Suggestions = data.data.options
-    },
+    }, 500),
+
+    // 搜索联想建议
+    // async onSearchInput () {
+    //   const searchText = this.searchText
+    //   if (!searchText) {
+    //     return
+    //   }
+    //   const { data } = await getSuggestions(searchText)
+    //   this.Suggestions = data.data.options
+    // },
     // 联想建议高亮显示
     highlight (str) {
       return str
