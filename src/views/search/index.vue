@@ -7,7 +7,7 @@
         v-model="searchText"
         placeholder="请输入搜索关键词"
         show-action
-        @search="onSearch"
+        @search="onSearch(searchText)"
         @cancel="$router.back()"
         @focus="isResultShow=false"
         @input="onSearchInput"
@@ -18,7 +18,7 @@
     <search-result v-if="isResultShow" :q='searchText'></search-result>
     <!-- 联想建议 -->
     <van-cell-group v-else-if="searchText">
-      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index" @click="onShow(item)">
+      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index" @click="onSearch(item)">
         <div slot="title" v-html="highlight(item)"></div>   <!-- 高亮显示联想建议 -->
       </van-cell>
     </van-cell-group>
@@ -68,8 +68,10 @@ export default {
   created () {},
   mounted () {},
   methods: {
-    onSearch () {
+    onSearch (q) {
       this.isResultShow = true
+      // q是输入框本身或联想建议
+      this.searchText = q
       //   记录历史记录
       const index = this.liShiJiLU.indexOf(this.searchText)
       if (index !== -1) {
@@ -94,12 +96,12 @@ export default {
           this.searchText.toLowerCase(),
           `<span style='color:red'>${this.searchText}</span>`
         )
-    },
-    // 点击联想建议搜索
-    onShow (item) {
-      this.searchText = item // 更新搜索框的数据
-      this.isResultShow = true// 展示搜索结果
     }
+    // 点击联想建议搜索
+    // onShow (item) { //这个方法可以不用了，调用改成onsearch了，因为要点击联想建议加历史记录
+    //   this.searchText = item // 更新搜索框的数据
+    //   this.isResultShow = true// 展示搜索结果
+    // }
   }
 }
 </script>
