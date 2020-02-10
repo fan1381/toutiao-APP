@@ -64,9 +64,11 @@
         name="comment-o"
         info="9"
       />
+    <!-- 根据接口里的数据来判断收藏状态，来显示实心还是空心图标 -->
       <van-icon
         color="orange"
-        name="star"
+        :name="article.is_collected?'star':'star-o'"
+        @click="onCollect"
       />
       <van-icon
         color="#e5645f"
@@ -79,7 +81,7 @@
 </template>
 
 <script>
-import { getArticleById } from '@/api/article'
+import { getArticleById, addCollect, deleteCollect } from '@/api/article'
 export default {
   name: 'ArticlePage',
   components: {},
@@ -112,6 +114,32 @@ export default {
         console.log(err)
       }
       this.loading = false
+    },
+    // 添加取消收藏文章
+    async onCollect () {
+      // 加载loading状态，并禁止背景点击，防止网络慢时，用户频繁点击
+      this.$toast.loading({
+        duration: 0, // 持续展示 toast
+        message: '操作中...',
+        forbidClick: true // 是否禁止背景点击
+      })
+      // 判断是否收藏
+      try {
+        if (this.article.is_collected) {
+          // 取消收藏
+          await deleteCollect(this.articleId)
+          this.article.is_collected = false
+          this.$toast.success('已取消收藏')
+        } else {
+          // 收藏
+          await addCollect(this.articleId)
+          this.article.is_collected = true
+          this.$toast.success('收藏成功')
+        }
+      } catch (err) {
+        // console.log(err)
+        this.$toast.fail('操作失败')
+      }
     }
   }
 }
