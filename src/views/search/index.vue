@@ -15,27 +15,34 @@
     </form>
 
     <!-- 搜索结果 -->
-    <search-result v-if="isResultShow" :q='searchText'></search-result>
+    <search-result v-if="isResultShow" :q="searchText"></search-result>
     <!-- 联想建议 -->
     <van-cell-group v-else-if="searchText">
-      <van-cell icon="search" v-for="(item ,index) in Suggestions" :key="index" @click="onSearch(item)">
-        <div slot="title" v-html="highlight(item)"></div>   <!-- 高亮显示联想建议 -->
+      <van-cell
+        icon="search"
+        v-for="(item ,index) in Suggestions"
+        :key="index"
+        @click="onSearch(item)"
+      >
+        <div slot="title" v-html="highlight(item)"></div>
+        <!-- 高亮显示联想建议 -->
       </van-cell>
     </van-cell-group>
 
     <!-- 历史记录 -->
+
     <van-cell-group v-else>
       <van-cell title="历史记录">
-        <van-icon name="delete" />
-        <span>全部删除</span>
-        &nbsp;&nbsp;
-        <span>完成</span>
+        <template v-if="isDelShow">
+          <span @click="liShiJiLU=[]">全部删除</span>
+          &nbsp;&nbsp;
+          <span @click="isDelShow=false">完成</span>
+        </template>
+        <van-icon v-else @click="isDelShow=true"  name="delete"></van-icon>
       </van-cell>
-      <van-cell title="历史记录">
-        <van-icon name="close"></van-icon>
-      </van-cell>
-      <van-cell v-for="(item,index) in liShiJiLU" :key="index" :title="item">
-        <van-icon name="close"></van-icon>
+
+      <van-cell  v-for="(item,index) in liShiJiLU" :key="index" :title="item">
+        <van-icon @click="liShiJiLU.splice(index,1)" v-show="isDelShow" name="close"></van-icon>
       </van-cell>
     </van-cell-group>
   </div>
@@ -56,7 +63,8 @@ export default {
       isResultShow: false, // 搜索结果展示
       searchText: '', // 搜索内容
       Suggestions: [], // 接受联想建议
-      liShiJiLU: getItem('liShi') || []// 历史记录
+      liShiJiLU: getItem('liShi') || [], // 历史记录
+      isDelShow: false // 删除显示状态
     }
   },
   computed: {},
@@ -108,7 +116,7 @@ export default {
 
 <style scoped lang="less">
 .search-container {
-  padding-top: 0px;
+  padding-top:46px;
   // 让搜索栏固定在顶部
   .search-form {
     position: fixed;
