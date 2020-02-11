@@ -30,6 +30,19 @@
         >{{ article.is_followed?'已关注':'关注' }}</van-button>
       </div>
       <div class="markdown-body" v-html="article.content"></div>
+      <van-divider>正文结束</van-divider>
+      <van-cell title="全部评论 " :border="false"></van-cell>
+      <!-- 文章评论 -->
+      <van-list
+        v-model="articleComment.loading"
+        :finished="articleComment.finished"
+        finished-text="没有更多了"
+        @load="onLoad"
+      >
+        <ArticleItem
+        v-for="(comment,index) in articleComment.list"
+        :key="index" :comment="comment" />
+      </van-list>
     </div>
 
     <!-- 加载失败提示 -->
@@ -38,11 +51,12 @@
       <p class="text">亲，网络不给力哦~</p>
       <van-button class="btn" type="default" size="small">点击重试</van-button>
     </div>
-
+    <!-- 评论组件 -->
+    <!-- <ArticleComment></ArticleComment> -->
     <!-- 底部区域 -->
     <div class="footer">
       <van-button class="write-btn" type="default" round size="small">写评论</van-button>
-      <van-icon class="comment-icon" name="comment-o" info="9" />
+      <van-icon class="comment-icon" name="comment-o" :info="articleComment.totalCount" />
       <!-- 根据接口里的数据来判断收藏状态，来显示实心还是空心图标 -->
       <van-icon color="orange" :name="article.is_collected?'star':'star-o'" @click="onCollect" />
       <van-icon
@@ -63,11 +77,15 @@ import {
   addLike,
   deleteLike
 } from '@/api/article'
-import { addFollow, deleteFollow } from '@/api/user'
+import { addFollow, deleteFollow } from '@/api/user' // 关注用户
+import { getComments } from '@/api/comment.js' // 评论
+import ArticleItem from './components/comment-item'
 
 export default {
   name: 'ArticlePage',
-  components: {},
+  components: {
+    ArticleItem
+  },
   props: {
     articleId: {
       type: String,
@@ -77,14 +95,23 @@ export default {
   data () {
     return {
       article: {}, // 文章详情
-      loading: false,
-      isFollowLoading: false // 关注的loading
+      loading: true,
+      isFollowLoading: false, // 关注的loading
+      articleComment: {
+        // 评论相关数据
+        loading: false, // 评论的加载loading
+        list: [], // 评论列表
+        finished: false, // 评论是否加载结束
+        offset: null, // 请求下一页数据的页码
+        totalCount: 0 // 总数据条数
+      }
     }
   },
   computed: {},
   watch: {},
   created () {
     this.getArticle()
+    this.onLoad()
   },
   mounted () {},
   methods: {
@@ -151,6 +178,7 @@ export default {
         this.$toast.fail('操作失败')
       }
     },
+    // 关注用户
     async onFollow () {
       this.isFollowLoading = true // 关注的loading先转着
       try {
@@ -163,11 +191,33 @@ export default {
           // 关注
           await addFollow(authorId)
         }
-        this.article.is_followed = !this.article.is_followed// 更新视图
+        this.article.is_followed = !this.article.is_followed // 更新视图
       } catch (err) {
         this.$toast.fail('操作失败')
       }
       this.isFollowLoading = false // 关闭关注的loading
+    },
+    // 评论
+    async onLoad () {
+      const articleComment = this.articleComment
+      //   请求数据
+      const { data } = await getComments({
+        type: 'a', // 评论类型，a-对文章(article)的评论，c-对评论(comment)的回复
+        source: this.articleId, // 源id，文章id或评论id
+        offset: articleComment.offsetS, // 获取评论数据的偏移量，值为评论id，表示从此id的数据向后取，不传表示从第一页开始读取数据
+        limit: 10 // 每页大小
+      })
+      //   赋值
+      const { results } = data.data
+      articleComment.list.push(...results)
+      articleComment.totalCount = data.data.total_count // 更新总条数
+      articleComment.loading = false // 将加载更多loading关闭
+      //  判断是否还有数据
+      if (results.length) {
+        articleComment.offset = data.data.last_id // 更新获取下一页数据的页码
+      } else {
+        articleComment.finished = true // 没有数据了，关闭加载更多
+      }
     }
   }
 }
@@ -177,7 +227,7 @@ export default {
 @import "./github-markdown.css";
 
 .article-container {
-  padding: 46px 20px 50px;
+  padding: 46px 20px 150px;
   background: #fff;
   .loading {
     padding-top: 100px;
