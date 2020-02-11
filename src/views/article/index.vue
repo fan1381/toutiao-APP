@@ -1,20 +1,10 @@
 <template>
   <div class="article-container">
     <!-- 导航栏 -->
-    <van-nav-bar
-      title="文章详情"
-      left-arrow
-      fixed
-      @click-left="$router.back()"
-    ></van-nav-bar>
+    <van-nav-bar title="文章详情" left-arrow fixed @click-left="$router.back()"></van-nav-bar>
 
     <!-- 加载中 -->
-    <van-loading
-    v-if="loading"
-      class="loading"
-      color="#1989fa"
-      vertical
-    >
+    <van-loading v-if="loading" class="loading" color="#1989fa" vertical>
       <slot>加载中...</slot>
     </van-loading>
 
@@ -23,66 +13,58 @@
       <h3 class="title">{{article.title}}</h3>
       <div class="author-wrap">
         <div class="base-info">
-          <van-image
-            class="avatar"
-            round
-            fit="cover"
-            :src="article.aut_photo"
-          />
+          <van-image class="avatar" round fit="cover" :src="article.aut_photo" />
           <div class="text">
             <p class="name">{{article.aut_name}}</p>
             <p class="time">{{article.pubdate}}</p>
           </div>
         </div>
-        <van-button v-if="$store.state.user||article.aut_id!==当前登录用户id" class="follow-btn" type="info" size="small" round>{{ article.is_followed?'以关注':'关注' }}</van-button>
+        <van-button
+          @click="onFollow"
+          v-if="$store.state.user||article.aut_id!==$store.state.user.id"
+          class="follow-btn"
+          type="info"
+          size="small"
+          round
+          :loading="isFollowLoading"
+        >{{ article.is_followed?'已关注':'关注' }}</van-button>
       </div>
-      <div class="markdown-body" v-html="article.content">
-      </div>
+      <div class="markdown-body" v-html="article.content"></div>
     </div>
 
     <!-- 加载失败提示 -->
     <div v-else class="error">
-      <img src="./no-network.png" alt="no-network">
+      <img src="./no-network.png" alt="no-network" />
       <p class="text">亲，网络不给力哦~</p>
-      <van-button
-        class="btn"
-        type="default"
-        size="small"
-      >点击重试</van-button>
+      <van-button class="btn" type="default" size="small">点击重试</van-button>
     </div>
 
     <!-- 底部区域 -->
     <div class="footer">
-      <van-button
-        class="write-btn"
-        type="default"
-        round
-        size="small"
-      >写评论</van-button>
-      <van-icon
-        class="comment-icon"
-        name="comment-o"
-        info="9"
-      />
-    <!-- 根据接口里的数据来判断收藏状态，来显示实心还是空心图标 -->
-      <van-icon
-        color="orange"
-        :name="article.is_collected?'star':'star-o'"
-        @click="onCollect"
-      />
+      <van-button class="write-btn" type="default" round size="small">写评论</van-button>
+      <van-icon class="comment-icon" name="comment-o" info="9" />
+      <!-- 根据接口里的数据来判断收藏状态，来显示实心还是空心图标 -->
+      <van-icon color="orange" :name="article.is_collected?'star':'star-o'" @click="onCollect" />
       <van-icon
         color="#e5645f"
         :name="article.attitude===1?'good-job':'good-job-o'"
-      @click="onLike"
+        @click="onLike"
       />
       <van-icon class="share-icon" name="share" />
     </div>
-
   </div>
 </template>
 
 <script>
-import { getArticleById, addCollect, deleteCollect, addLike, deleteLike } from '@/api/article'
+import {
+  getArticleById,
+  addCollect,
+  deleteCollect,
+  addLike,
+  deleteLike
+} from '@/api/article'
+import { addFollow, deleteFollow } from '@/api/user'
+
 export default {
   name: 'ArticlePage',
   components: {},
@@ -95,7 +77,8 @@ export default {
   data () {
     return {
       article: {}, // 文章详情
-      loading: false
+      loading: false,
+      isFollowLoading: false // 关注的loading
     }
   },
   computed: {},
@@ -160,13 +143,31 @@ export default {
         } else {
           // 收藏
           await addLike(this.articleId)
-          this.article.attitude = -1
+          this.article.attitude = 1
           this.$toast.success('点赞成功')
         }
       } catch (err) {
         // console.log(err)
         this.$toast.fail('操作失败')
       }
+    },
+    async onFollow () {
+      this.isFollowLoading = true // 关注的loading先转着
+      try {
+        // 判断是否关注,已关注择取消关注
+        const authorId = this.article.aut_id
+        if (this.article.is_followed) {
+          // 取消关注
+          await deleteFollow(authorId)
+        } else {
+          // 关注
+          await addFollow(authorId)
+        }
+        this.article.is_followed = !this.article.is_followed// 更新视图
+      } catch (err) {
+        this.$toast.fail('操作失败')
+      }
+      this.isFollowLoading = false // 关闭关注的loading
     }
   }
 }
@@ -187,7 +188,7 @@ export default {
       margin: 0;
       padding-top: 24px;
       font-size: 20px;
-      color: #3A3A3A;
+      color: #3a3a3a;
     }
     .author-wrap {
       display: flex;
@@ -256,6 +257,5 @@ export default {
       bottom: -2px;
     }
   }
-};
-
+}
 </style>
