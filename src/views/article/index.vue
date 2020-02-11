@@ -44,6 +44,7 @@
           v-for="(comment,index) in articleComment.list"
           :key="index"
           :comment="comment"
+          @click-reply="onReplyShow"
         />
       </van-list>
     </div>
@@ -81,9 +82,13 @@
           placeholder="请输入留言"
           show-word-limit
         />
-      <van-button @click="onAddComment" size="small" type="primary">发布</van-button>
-
+        <van-button @click="onAddComment" size="small" type="primary">发布</van-button>
       </div>
+    </van-popup>
+    <!-- 评论回复 -->
+    <van-popup v-model="isReplyShow" position="bottom" style="height:50%">
+      <!-- 回复评论组件 -->
+<commentReply @click-close='isReplyShow=false' :comment='currentComment'></commentReply>
     </van-popup>
   </div>
 </template>
@@ -99,11 +104,13 @@ import {
 import { addFollow, deleteFollow } from '@/api/user' // 关注用户
 import { getComments, addComment } from '@/api/comment.js' // 评论
 import ArticleItem from './components/comment-item'
+import commentReply from './components/comment-reply'
 
 export default {
   name: 'ArticlePage',
   components: {
-    ArticleItem
+    ArticleItem,
+    commentReply
   },
   props: {
     articleId: {
@@ -125,7 +132,9 @@ export default {
         totalCount: 0 // 总数据条数
       },
       isPostShow: false, // 发布评论的显示状态
-      postMessage: ''
+      postMessage: '', // 输入框内容
+      isReplyShow: false, // 评论回复弹层
+      currentComment: {}// 点击回复评论的值
     }
   },
   computed: {},
@@ -225,7 +234,7 @@ export default {
       const { data } = await getComments({
         type: 'a', // 评论类型，a-对文章(article)的评论，c-对评论(comment)的回复
         source: this.articleId, // 源id，文章id或评论id
-        offset: articleComment.offsetS, // 获取评论数据的偏移量，值为评论id，
+        offset: articleComment.offset, // 获取评论数据的偏移量，值为评论id，
         // 表示从此id的数据向后取，不传表示从第一页开始读取数据
         limit: 10 // 每页大小
       })
@@ -234,6 +243,7 @@ export default {
       articleComment.list.push(...results)
       articleComment.totalCount = data.data.total_count // 更新总条数
       articleComment.loading = false // 将加载更多loading关闭
+
       //  判断是否还有数据
       if (results.length) {
         articleComment.offset = data.data.last_id // 更新获取下一页数据的页码
@@ -252,16 +262,21 @@ export default {
         const { data } = await addComment({
           target: this.$route.params.articleId, // 评论的目标id（评论文章即为文章id，对评论进行回复则为评论id）
           content: postMessage // 评论内容
-        // art_id // 文章id，对评论内容发表回复时，需要传递此参数，表明所属文章id。对文章进行评论，不要传此参数。
+          // art_id // 文章id，对评论内容发表回复时，需要传递此参数，表明所属文章id。对文章进行评论，不要传此参数。
         })
-        this.isPostShow = false// 关闭弹层
-        this.articleComment.list.unshift(data.data.new_obj)// 将发布的文章添加到顶部
-        this.articleComment.totalCount++
+        this.isPostShow = false // 关闭弹层
+        this.articleComment.list.unshift(data.data.new_obj) // 将发布的文章添加到顶部
+        this.articleComment.totalCount++ //
         this.$toast.fail('发布成功')
-        this.postMessage = ''// 清空输入框文本
+        this.postMessage = '' // 清空输入框文本
       } catch (err) {
         this.$toast.fail('发布失败')
       }
+    },
+    // 打开回复弹层
+    async onReplyShow (comment) {
+      this.currentComment = comment// 从item组件传值过来，这个接受，再发给reply
+      this.isReplyShow = true
     }
   }
 }
