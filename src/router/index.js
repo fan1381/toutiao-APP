@@ -52,6 +52,11 @@ const routes = [{
         import ('@/views/article'),
   // 将路由动态参数映射到组件的 props 中，更推荐这种做法
   props: true
+}, {
+  name: 'user-profile',
+  path: '/user/profile',
+  component: () =>
+        import ('@/views/user')
 }]
 
 const router = new VueRouter({
