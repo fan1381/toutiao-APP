@@ -16,7 +16,7 @@
       maxlength="10"
       placeholder="请输入昵称"
       show-word-limit
-        :value="name"
+      :value="name"
     />
   </div>
 </template>

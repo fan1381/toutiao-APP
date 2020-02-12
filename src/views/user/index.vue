@@ -13,17 +13,19 @@
         />
       </van-cell>
       <van-cell title="昵称" :value="user.name" is-link  @click="isEditName=true"/>
-      <van-cell title="性别" :value="user.gender===0?'男':'女'" is-link />
+      <van-cell title="性别" :value="user.gender===0?'男':'女'" is-link @click="isEditGender = true"/>
       <van-cell title="生日" :value="user.birthday" is-link />
     </van-cell-group>
     <van-popup
         v-model="isEditName"
         position="bottom"
     >
-    <nickname @close='isEditName=false' @confirm='onSave' :name='user.name'></nickname>
+    <nickname @close='isEditName=false' @confirm='onSaveName' :name='user.name'></nickname>
     <birthday></birthday>
     <gender></gender>
     </van-popup>
+    <!-- 修改用户性别 -->
+    <van-action-sheet v-model="isEditGender" :actions="actions" @select="onGenderSelect" cancel-text="取消"/>
   </div>
 </template>
 
@@ -45,7 +47,12 @@ export default {
     return {
       user: {}, // 用户资料
       isEditName: false,
-      images: [] // 预览的图片列表
+      isEditGender: false,
+      images: [], // 预览的图片列表
+      actions: [
+        { name: '男', value: 0 },
+        { name: '女', value: 1 }
+      ]
     }
   },
   computed: {},
@@ -65,21 +72,33 @@ export default {
         this.$toast.fail('获取数据失败')
       }
     },
-    // 修改用户昵称
-    async onSave (name) {
+    // 封装一个统一的保存的方法
+    async save (field, value) {
       this.$toast.loading({
         duration: 0, // 持续展示
         message: '保存中',
         forbidClick: true// 是否禁止背景点击
       })
       try {
-        this.user.name = name// 修改数据
-        await updateUserProfile({ name: name })
-        this.$toast('修改成功')
-        this.isEditName = false// 关闭弹层
-      } catch (err) {
-        this.$toast('操作失败')
+        await updateUserProfile({
+          [field]: value
+        })
+        this.$toast('保存成功')
+      } catch (error) {
+        this.$toast('保存失败')
       }
+    },
+    // 修改用户昵称
+    async onSaveName (name) {
+      await this.save('name', name)
+      this.user.name = name// 修改数据
+      this.isEditName = false// 关闭弹层
+    },
+    // 修改性别
+    async onGenderSelect ({ value }) {
+      await this.save('gender', value)
+      this.user.gender = value
+      this.isEditGender = false
     }
   }
 }
