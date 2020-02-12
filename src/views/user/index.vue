@@ -12,23 +12,38 @@
           :src="user.photo"
         />
       </van-cell>
-      <van-cell title="昵称" :value="user.name" is-link />
+      <van-cell title="昵称" :value="user.name" is-link  @click="isEditName=true"/>
       <van-cell title="性别" :value="user.gender===0?'男':'女'" is-link />
       <van-cell title="生日" :value="user.birthday" is-link />
     </van-cell-group>
+    <van-popup
+        v-model="isEditName"
+        position="bottom"
+    >
+    <nickname ></nickname>
+    <birthday></birthday>
+    <gender></gender>
+    </van-popup>
   </div>
 </template>
 
 <script>
-import { getUserProfile } from '@/api/user.js'
+import { getUserProfile } from '@/api/user.js'// 获取用户资料
+import birthday from './components/edit-birthday'
+import gender from './components/edit-gender'
+import nickname from './components/edit-nickname'
 export default {
   name: 'UserProfile',
-  components: {},
+  components: {
+    birthday,
+    gender,
+    nickname
+  },
   props: {},
   data () {
     return {
       user: {}, // 用户资料
-      isPreviewShow: false,
+      isEditName: false,
       images: [] // 预览的图片列表
     }
   },
