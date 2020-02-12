@@ -1,7 +1,7 @@
 // 评论接口模块
 import request from '@/utils/request'
 
-//  获取文章列表
+//  获取文章列表或回复列表
 export function getComments (params) {
   return request({
     method: 'GET',
