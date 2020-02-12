@@ -88,7 +88,7 @@
     <!-- 评论回复 -->
     <van-popup v-model="isReplyShow" position="bottom" style="height:50%">
       <!-- 回复评论组件 -->
-<commentReply @click-close='isReplyShow=false' :comment='currentComment'></commentReply>
+<commentReply v-if="isReplyShow" @click-close='isReplyShow=false' :comment='currentComment'></commentReply>
     </van-popup>
   </div>
 </template>
