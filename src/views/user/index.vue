@@ -20,7 +20,7 @@
         v-model="isEditName"
         position="bottom"
     >
-    <nickname ></nickname>
+    <nickname @close='isEditName=false' @confirm='onSave' :name='user.name'></nickname>
     <birthday></birthday>
     <gender></gender>
     </van-popup>
@@ -28,10 +28,11 @@
 </template>
 
 <script>
-import { getUserProfile } from '@/api/user.js'// 获取用户资料
+import { getUserProfile, updateUserProfile } from '@/api/user.js'// 获取用户资料
 import birthday from './components/edit-birthday'
 import gender from './components/edit-gender'
 import nickname from './components/edit-nickname'
+
 export default {
   name: 'UserProfile',
   components: {
@@ -54,14 +55,30 @@ export default {
   },
   mounted () {},
   methods: {
+    // 获取用户资料
     async loadUserProfile () {
       try {
         const { data } = await getUserProfile()
         this.user = data.data
-        console.log(data)
       } catch (err) {
         console.log(err)
         this.$toast.fail('获取数据失败')
+      }
+    },
+    // 修改用户昵称
+    async onSave (name) {
+      this.$toast.loading({
+        duration: 0, // 持续展示
+        message: '保存中',
+        forbidClick: true// 是否禁止背景点击
+      })
+      try {
+        this.user.name = name// 修改数据
+        await updateUserProfile({ name: name })
+        this.$toast('修改成功')
+        this.isEditName = false// 关闭弹层
+      } catch (err) {
+        this.$toast('操作失败')
       }
     }
   }

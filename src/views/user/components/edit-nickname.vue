@@ -1,14 +1,22 @@
 <template>
   <div>
-    <van-nav-bar title="编辑昵称" left-text="取消" right-text="确定" />
+    <van-nav-bar
+      title="编辑昵称"
+      left-text="取消"
+      right-text="确定"
+      @click-left="$emit('close')"
+      @click-right="$emit('confirm',message)"
+
+    />
     <van-field
-      v-model="message"
+      @input="message=$event"
       rows="2"
       autosize
       type="textarea"
       maxlength="10"
       placeholder="请输入昵称"
       show-word-limit
+        :value="name"
     />
   </div>
 </template>
@@ -16,7 +24,13 @@
 export default {
   name: 'EditNmae',
   comments: {},
-  props: {},
+
+  props: {
+    name: {
+      type: String,
+      required: ''
+    }
+  },
   data () {
     return {
       message: ''
