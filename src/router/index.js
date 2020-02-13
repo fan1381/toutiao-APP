@@ -1,6 +1,7 @@
 // 配置路由
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Chat from '@/views/user-chat'
 // import login from '@/views/login' // 引入登录页面
 
 Vue.use(VueRouter)
@@ -57,6 +58,10 @@ const routes = [{
   path: '/user/profile',
   component: () =>
         import ('@/views/user')
+}, {
+  name: 'user-chat',
+  path: '/user/chat',
+  component: Chat
 }]
 
 const router = new VueRouter({
